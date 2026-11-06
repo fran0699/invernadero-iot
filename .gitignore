@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Base de datos local del gateway: se entregan los scripts SQL, no el archivo
+*.db
+
+# Claves de Adafruit IO: nunca se suben (ver docs/contrato.md, sección 6)
+gateway/secretos.py
