@@ -39,3 +39,8 @@ TOPICO_CONTROL = TOPICO_BASE + "/control"
 
 # Regla #11: la placa solo ejecuta las órdenes que traen este token
 TOKEN = "INVERNADERO_DS8_2026"
+
+# --- Almacenamiento offline y tiempo UTC (José) ---
+ARCHIVO_PENDIENTES = "pendientes.json"
+MAX_LECTURAS_PENDIENTES = 50
+SEGUNDOS_ENTRE_1970_Y_2000 = 946684800
