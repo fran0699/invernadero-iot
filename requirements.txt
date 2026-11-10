@@ -1,0 +1,8 @@
+# Invernadero IoT - Desarrollo de Software VIII
+# Dependencias necesarias para ejecutar el Gateway en Python.
+#
+# Instalacion desde la raiz del proyecto:
+# py -m pip install -r requirements.txt
+#
+# Biblioteca para la comunicacion con el broker MQTT EMQX.
+paho-mqtt==2.2.0
