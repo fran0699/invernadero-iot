@@ -47,7 +47,7 @@ flowchart LR
 | Dispositivo | `placa/reglas.py` | Francisco | Reglas automáticas: más de 30 °C enciende el ventilador; menos de 40 % de luz enciende la luz de cultivo |
 | Dispositivo | `placa/red.py`, `conexion_mqtt.py`, `almacenamiento.py`, `main.py` | José | Wi-Fi con timeout, hora NTP, cliente MQTT, muestreo cada 5 s con `Timer` y guardado local si se cae la conexión |
 | Transporte | Broker EMQX | — | Broker MQTT público y gratuito; reparte los mensajes entre la placa y el gateway |
-| Gateway | `gateway/main.py`, `base_datos.py`, `consultas.py` | Juan | Escucha MQTT, guarda todo en SQLite con su timestamp y reenvía a la placa las órdenes del dashboard |
+| Gateway | `gateway/main.py`, `base_datos.py`, `validaciones.py`, `consultas.py`, `sql/crear_tablas.sql` | Juan | Escucha MQTT, guarda todo en SQLite con su timestamp y reenvía a la placa las órdenes del dashboard |
 | Gateway | `gateway/nube.py` | Luis | Sube las lecturas a Adafruit IO (máximo cada 15 s) y traduce los botones del dashboard a órdenes del contrato |
 | Nube | Adafruit IO | Luis | Guarda los datos en feeds y los muestra en un dashboard con medidores, gráfica, indicadores y botones |
 
