@@ -2,7 +2,7 @@
 
 Este documento fija lo que comparten los módulos: los tópicos MQTT, el formato de los mensajes y los nombres de las funciones que un módulo llama de otro. Mientras todos lo respeten, cada uno puede programar y probar su parte sin esperar a los demás.
 
-Si algo de aquí tiene que cambiar, se avisa en el grupo y primero se cambia este archivo, en un PR propio.
+Si algo de aquí tiene que cambiar, se avisa en el grupo y primero se cambia este archivo, en una rama propia, y se fusiona junto con las demás.
 
 ## 1. Dueño de cada archivo
 
