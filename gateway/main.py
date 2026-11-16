@@ -4,10 +4,14 @@ main.py
 
 Gateway MQTT del Invernadero IoT.
 
-Se conecta al broker EMQX para recibir los mensajes
-enviados por la Raspberry Pi Pico W.
+Se conecta al broker EMQX para recibir mensajes de la Raspberry Pi Pico W,
+validarlos y almacenarlos en SQLite.
+
+También se conecta con Adafruit IO para mostrar lecturas en el dashboard
+y reenviar comandos de control hacia la placa.
 """
 
+import json
 import paho.mqtt.client as mqtt
 
 from gateway.config import (
@@ -20,9 +24,8 @@ from gateway.config import (
     TOKEN
 )
 
-import json
-
 from gateway.base_datos import (
+    inicializar_base_datos,
     guardar_lectura,
     guardar_evento,
     guardar_comando
@@ -36,6 +39,12 @@ from gateway.validaciones import (
     validar_comando
 )
 
+from gateway import nube
+
+
+# Cliente MQTT que se conecta al broker EMQX.
+# Se comparte con la función que recibe comandos desde Adafruit IO.
+cliente_emqx = None
 
 
 def al_conectar(cliente, datos_usuario, flags, codigo, propiedades):
@@ -44,15 +53,12 @@ def al_conectar(cliente, datos_usuario, flags, codigo, propiedades):
     if codigo == 0:
         print("Gateway conectado correctamente al broker MQTT.")
 
-        # Suscribirse a las lecturas de sensores
         cliente.subscribe(TOPICO_LECTURAS)
         print("Suscrito al tópico:", TOPICO_LECTURAS)
 
-        # Suscribirse a los eventos del invernadero
         cliente.subscribe(TOPICO_EVENTOS)
         print("Suscrito al tópico:", TOPICO_EVENTOS)
 
-        # Suscribirse a las respuestas de comandos
         cliente.subscribe(TOPICO_COMANDOS)
         print("Suscrito al tópico:", TOPICO_COMANDOS)
 
@@ -60,11 +66,9 @@ def al_conectar(cliente, datos_usuario, flags, codigo, propiedades):
         print("Error de conexion MQTT. Codigo:", codigo)
 
 
-
-
-
 def al_recibir_mensaje(cliente, datos_usuario, mensaje):
     """Recibe mensajes MQTT y los guarda según su tópico."""
+
     try:
         contenido = mensaje.payload.decode("utf-8")
         datos = json.loads(contenido)
@@ -77,7 +81,6 @@ def al_recibir_mensaje(cliente, datos_usuario, mensaje):
         print("Topico:", mensaje.topic)
         print("Contenido:", datos)
 
-        
         if mensaje.topic == TOPICO_LECTURAS:
 
             campos_lectura = [
@@ -97,10 +100,14 @@ def al_recibir_mensaje(cliente, datos_usuario, mensaje):
                 and validar_valores_lectura(datos)
             ):
                 guardar_lectura(datos)
+
+                # Enviar también la lectura válida a Adafruit IO.
+                # nube.py controla el intervalo de publicación.
+                nube.enviar_lectura(datos)
+
             else:
                 print("Lectura MQTT rechazada: datos invalidos.")
 
-        
         elif mensaje.topic == TOPICO_EVENTOS:
 
             if validar_evento(datos):
@@ -108,15 +115,12 @@ def al_recibir_mensaje(cliente, datos_usuario, mensaje):
             else:
                 print("Evento MQTT rechazado: datos invalidos.")
 
-
-        
         elif mensaje.topic == TOPICO_COMANDOS:
 
             if validar_comando(datos):
                 guardar_comando(datos)
             else:
                 print("Comando MQTT rechazado: datos invalidos.")
-
 
         else:
             print("Mensaje recibido desde un topico desconocido.")
@@ -125,36 +129,63 @@ def al_recibir_mensaje(cliente, datos_usuario, mensaje):
         print("Error al interpretar el mensaje MQTT:", error)
 
 
+def reenviar_orden_de_la_nube(accion, valor):
+    """
+    Recibe una orden desde Adafruit IO y la envía a la Pico W
+    utilizando el cliente MQTT conectado a EMQX.
+    """
 
+    global cliente_emqx
+
+    if cliente_emqx is None or not cliente_emqx.is_connected():
+        print("No hay conexion con EMQX para enviar el comando.")
+        return False
+
+    return enviar_comando(cliente_emqx, accion, valor)
 
 
 def iniciar_gateway():
-    """Crea el cliente MQTT y establece la conexión."""
+    """Inicializa SQLite y establece las conexiones MQTT."""
 
-    # Crear un cliente MQTT con un identificador propio
+    global cliente_emqx
+
+    # Crear las tablas de SQLite si todavía no existen.
+    inicializar_base_datos()
+
+    # Crear el cliente MQTT de EMQX.
     cliente = mqtt.Client(
         callback_api_version=mqtt.CallbackAPIVersion.VERSION2
     )
 
-    # Indicar qué función ejecutar al conectarse
     cliente.on_connect = al_conectar
     cliente.on_message = al_recibir_mensaje
+
+    # Guardar la referencia para enviar comandos desde la nube.
+    cliente_emqx = cliente
 
     try:
         print("Conectando al broker:", MQTT_BROKER)
 
-        # Establecer conexión con EMQX
+        # Conectar primero con EMQX.
         cliente.connect(MQTT_BROKER, MQTT_PUERTO, 60)
 
-        # Mantener el cliente procesando mensajes MQTT
+        # Iniciar la conexión independiente con Adafruit IO.
+        nube.conectar(reenviar_orden_de_la_nube)
+
+        # Mantener el cliente EMQX procesando mensajes.
         cliente.loop_forever()
 
-    except (OSError, ValueError) as error:
+    except (OSError, ValueError, RuntimeError) as error:
         print("Error al iniciar el Gateway:", error)
+
+    finally:
+        nube.desconectar()
+        cliente.disconnect()
+        cliente_emqx = None
 
 
 def enviar_comando(cliente, accion, valor):
-
+    """Publica un comando validado en el tópico /control."""
 
     if accion not in ("ventilador", "luz_cultivo", "modo"):
         print("Error: accion no permitida.")
@@ -182,7 +213,6 @@ def enviar_comando(cliente, accion, valor):
         payload=mensaje
     )
 
-    
     if resultado.rc != mqtt.MQTT_ERR_SUCCESS:
         print("Error al publicar comando MQTT.")
         return False
@@ -195,7 +225,6 @@ def enviar_comando(cliente, accion, valor):
 
     print("Error: no se confirmo la publicacion MQTT.")
     return False
-
 
 
 if __name__ == "__main__":

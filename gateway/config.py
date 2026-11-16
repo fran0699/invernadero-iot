@@ -21,3 +21,23 @@ TOKEN = "INVERNADERO_DS8_2026"
 
 # --- Base de datos (Juan) ---
 RUTA_BASE_DATOS = "invernadero.db"   # Archivo SQLite que usa el gateway
+
+# --- Adafruit IO (Luis) ---
+
+ADAFRUIT_SERVIDOR = "io.adafruit.com"
+ADAFRUIT_PUERTO = 8883
+INTERVALO_NUBE_S = 15
+
+# Feeds para visualizar lecturas y estados
+FEED_TEMPERATURA = "temperatura"
+FEED_HUMEDAD = "humedad"
+FEED_LUZ = "luz"
+
+FEED_ESTADO_VENTILADOR = "estado-ventilador"
+FEED_ESTADO_LUZ_CULTIVO = "estado-luz-cultivo"
+FEED_ESTADO_MODO = "estado-modo"
+
+# Feeds para recibir comandos del dashboard
+FEED_CONTROL_VENTILADOR = "control-ventilador"
+FEED_CONTROL_LUZ_CULTIVO = "control-luz-cultivo"
+FEED_CONTROL_MODO = "control-modo"
