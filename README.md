@@ -125,8 +125,9 @@ La nube se puede probar sola, sin placa ni gateway, con `py -m gateway.prueba_nu
 
 - Antes de programar, lee [docs/contrato.md](docs/contrato.md): tópicos, mensajes, funciones y dueño de cada archivo.
 - Lo que vale es lo que está en `main`. Wokwi es solo para probar: cada uno usa su copia del proyecto.
-- Una rama por tarea, por ejemplo `feature/sensores-dht22`, y un PR con dos apartados: "Qué cambia" y "Cómo se verificó".
-- Cada PR lo aprueba otro integrante antes de fusionarlo: José revisa a Francisco, Juan a José, Luis a Juan y Francisco a Luis.
+- Cada integrante publica su código en su propia rama y no fusiona a `main` todavía.
+- Todos leemos el código de todos. Cualquier duda, consulta o cambio se atiende en la rama del dueño del archivo.
+- Cuando no quede nada por cambiar y todos entendamos todo, fusionamos las cuatro ramas a la vez.
 - El código se escribe para explicarlo proyectado:
   - Cada archivo empieza con un comentario corto: qué hace y con qué módulo se conecta.
   - Funciones cortas, que quepan en la pantalla, con un docstring que diga qué reciben y qué devuelven.
