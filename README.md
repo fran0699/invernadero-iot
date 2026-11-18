@@ -24,7 +24,7 @@ La Pico W lee la temperatura, la humedad y la luz, y enciende el ventilador o la
 | GPIO con librerías apropiadas | `machine.Pin`, `machine.ADC` y `dht` de MicroPython | `placa/` |
 | Lectura en tiempo real | `Timer` cada 5 s | `placa/main.py` |
 | Control de actuadores | Reglas automáticas por umbral y órdenes desde el dashboard | `placa/reglas.py`, `placa/conexion_mqtt.py` |
-| Cliente MQTT en el dispositivo | Broker público EMQX | `placa/conexion_mqtt.py` |
+| Cliente MQTT en el dispositivo | `umqtt.simple` de MicroPython con el broker público EMQX | `placa/conexion_mqtt.py`, `placa/umqttsimple.py` |
 | Base de datos con timestamp, eventos y comandos | SQLite con tablas `lecturas`, `eventos` y `comandos` | `gateway/base_datos.py`, `sql/` |
 | Consultas de históricos | Últimos registros de cada tabla desde la terminal | `gateway/consultas.py` |
 | Plataforma en la nube con dashboard en tiempo real | Adafruit IO: medidores, gráfica e indicadores | `gateway/nube.py`, [configuración](docs/configuracion_nube.md) |
@@ -35,7 +35,7 @@ La Pico W lee la temperatura, la humedad y la luz, y enciende el ventilador o la
 
 | Carpeta / archivo | Contenido |
 |---|---|
-| `placa/` | Código MicroPython y circuito (`diagram.json`) del proyecto de Wokwi |
+| `placa/` | Código MicroPython y circuito (`diagram.json`) del proyecto de Wokwi. Incluye `umqttsimple.py`, la librería MQTT oficial de MicroPython copiada sin cambios, porque el firmware de la Pico W no la trae |
 | `gateway/` | Programa en Python que corre en la PC: MQTT, SQLite y Adafruit IO |
 | `gateway/secretos_ejemplo.py` | Plantilla de las claves de Adafruit IO (el archivo real, `secretos.py`, no se sube) |
 | `sql/` | Scripts de creación de tablas y consultas |
@@ -92,6 +92,7 @@ Conectado a Adafruit IO como <usuario>
 
 1. Abrir el proyecto en Wokwi: **<!-- TODO Francisco: enlace del proyecto -->**
    (o crear un proyecto de Raspberry Pi Pico W con MicroPython y copiar ahí todos los archivos de `placa/`).
+   `umqttsimple.py` va junto a los demás archivos, no dentro de una carpeta `umqtt/`, porque Wokwi no permite carpetas. Sin él, la placa falla con `ImportError: no module named 'umqtt'`.
 2. Presionar **Start Simulation**. La consola de Wokwi debe mostrar la conexión a `Wokwi-GUEST`, la hora NTP y la conexión a EMQX.
 3. Para cambiar las lecturas: hacer clic en el DHT22 o en la fotorresistencia durante la simulación y mover los controles.
 

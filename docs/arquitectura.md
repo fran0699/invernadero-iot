@@ -78,6 +78,7 @@ flowchart LR
 |---|---|---|
 | MicroPython | la de Wokwi | Programa de la Pico W |
 | Wokwi | — | Simulador del circuito |
+| umqtt.simple | 1.8.1 (micropython-lib) | Cliente MQTT de la placa; copiado sin cambios en `placa/umqttsimple.py` porque el firmware de la Pico W no lo trae |
 | Python | 3.12 | Gateway |
 | paho-mqtt | 2.2.0 | Cliente MQTT del gateway, para EMQX y para Adafruit IO |
 | EMQX | broker público | Broker MQTT entre placa y gateway |
