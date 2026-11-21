@@ -8,7 +8,7 @@ para comunicarse con el Gateway Python a través de broker.emqx.io.
 import json
 import machine
 import urandom
-from umqtt.simple import MQTTClient
+from umqttsimple import MQTTClient
 import config
 import red
 

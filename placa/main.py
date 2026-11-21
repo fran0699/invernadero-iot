@@ -21,6 +21,7 @@ modo_operacion = "auto"
 cliente_mqtt = None
 lectura_solicitada = False
 estaba_desconectado = False
+numero_ciclo = 0
 
 
 def solicitar_lectura(temporizador):
@@ -77,6 +78,8 @@ def al_recibir_control(topico_bytes, mensaje_bytes):
         conexion_mqtt.publicar_respuesta_comando(
             cliente_mqtt, "", None, "rechazado", "mensaje no es JSON"
         )
+        print("\n========== Orden recibida ==========")
+        print("Mensaje invalido -> rechazado (mensaje no es JSON)")
         return
 
     accion = datos.get("accion", "")
@@ -86,7 +89,11 @@ def al_recibir_control(topico_bytes, mensaje_bytes):
     conexion_mqtt.publicar_respuesta_comando(
         cliente_mqtt, accion, valor, resultado, motivo
     )
-    print("Orden procesada:", accion, "->", resultado, motivo)
+    print("\n========== Orden recibida ==========")
+    if motivo:
+        print(f"{accion} = {valor} -> {resultado} ({motivo})")
+    else:
+        print(f"{accion} = {valor} -> {resultado}")
 
 
 def reenviar_pendientes_y_notificar():
@@ -156,13 +163,46 @@ def construir_mensaje_lectura(datos_sensores, estado_actual):
     }
 
 
+def mostrar_ciclo(lectura, eventos_reglas):
+    """
+    Imprime en consola el encabezado del ciclo, sensores, actuadores y reglas.
+    Recibe el diccionario de lectura y la lista de textos de eventos. No devuelve nada.
+    """
+    if lectura["temperatura"] is None:
+        temp_texto = "sin dato"
+    else:
+        temp_texto = f"{lectura['temperatura']} C"
+
+    if lectura["humedad"] is None:
+        hum_texto = "sin dato"
+    else:
+        hum_texto = f"{lectura['humedad']} %"
+
+    if lectura["ventilador"]:
+        vent_texto = "ENCENDIDO"
+    else:
+        vent_texto = "apagado"
+
+    if lectura["luz_cultivo"]:
+        luz_texto = "ENCENDIDA"
+    else:
+        luz_texto = "apagada"
+
+    print(f"\n========== Ciclo {numero_ciclo} | modo {lectura['modo']} ==========")
+    print(f"Temperatura: {temp_texto} | Humedad: {hum_texto} | Luz: {lectura['luz']} %")
+    print(f"Ventilador: {vent_texto} | Luz de cultivo: {luz_texto}")
+    for texto_evento in eventos_reglas:
+        print(f"Regla: {texto_evento}")
+
+
 def procesar_ciclo_lectura():
     """
     Lee sensores, aplica reglas si está en modo auto y publica o guarda offline.
     No recibe parámetros. No devuelve ningún valor.
     """
-    global cliente_mqtt, estaba_desconectado
+    global cliente_mqtt, estaba_desconectado, numero_ciclo
 
+    numero_ciclo = numero_ciclo + 1
     datos_sensores = sensores.leer_sensores()
     eventos_reglas = []
 
@@ -171,11 +211,12 @@ def procesar_ciclo_lectura():
 
     estado_actual = actuadores.estado_actuadores()
     lectura = construir_mensaje_lectura(datos_sensores, estado_actual)
+    mostrar_ciclo(lectura, eventos_reglas)
 
     if asegurar_conexion():
         enviado = conexion_mqtt.publicar_lectura(cliente_mqtt, lectura)
         if enviado:
-            print("Lectura publicada:", lectura)
+            print("Envio: lectura publicada en EMQX")
             for texto_evento in eventos_reglas:
                 conexion_mqtt.publicar_evento(
                     cliente_mqtt, "regla_automatica", texto_evento
