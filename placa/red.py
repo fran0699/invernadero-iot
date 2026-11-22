@@ -56,6 +56,7 @@ def sincronizar_hora_ntp():
     global hora_sincronizada
 
     try:
+        ntptime.timeout = config.NTP_TIMEOUT_S
         ntptime.settime()
         hora_sincronizada = True
         print("Hora UTC sincronizada por NTP.")
