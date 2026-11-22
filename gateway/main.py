@@ -104,11 +104,11 @@ def al_recibir_mensaje(cliente, datos_usuario, mensaje):
 
                 ventilador = (
                     "ENCENDIDO" if datos["ventilador"]
-                    else "APAGADO"
+                    else "apagado"
                 )
 
                 luz_cultivo = (
-                    "encendida" if datos["luz_cultivo"]
+                    "ENCENDIDA" if datos["luz_cultivo"]
                     else "apagada"
                 )
 
