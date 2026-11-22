@@ -44,3 +44,4 @@ TOKEN = "INVERNADERO_DS8_2026"
 ARCHIVO_PENDIENTES = "pendientes.json"
 MAX_LECTURAS_PENDIENTES = 50
 SEGUNDOS_ENTRE_1970_Y_2000 = 946684800
+NTP_TIMEOUT_S = 3  # Segundos de espera a NTP: en Wokwi, 1 s (el valor por defecto) no alcanzaba
