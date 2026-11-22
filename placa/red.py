@@ -10,6 +10,9 @@ import time
 import ntptime
 import config
 
+# Queda en True cuando NTP respondió al menos una vez
+hora_sincronizada = False
+
 
 def conectar_wifi():
     """
@@ -50,8 +53,11 @@ def sincronizar_hora_ntp():
     Ajusta el reloj interno de la placa en UTC usando un servidor NTP.
     No recibe parámetros. Devuelve True si sincronizó o False si hubo error.
     """
+    global hora_sincronizada
+
     try:
         ntptime.settime()
+        hora_sincronizada = True
         print("Hora UTC sincronizada por NTP.")
         return True
     except Exception as error:
