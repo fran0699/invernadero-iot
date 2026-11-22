@@ -1,4 +1,3 @@
-
 """
 consultas.py
 
@@ -23,6 +22,7 @@ def consultar_lecturas():
                 SELECT
                     id,
                     dispositivo,
+                    datetime(timestamp, 'unixepoch', 'localtime') AS fecha,
                     temperatura,
                     humedad,
                     luz,
@@ -47,12 +47,13 @@ def consultar_lecturas():
             print(
                 "ID:", registro[0],
                 "| Dispositivo:", registro[1],
-                "| Temperatura:", registro[2],
-                "| Humedad:", registro[3],
-                "| Luz:", registro[4],
-                "| Ventilador:", registro[5],
-                "| Luz cultivo:", registro[6],
-                "| Modo:", registro[7]
+                "| Fecha:", registro[2],
+                "| Temperatura:", registro[3],
+                "| Humedad:", registro[4],
+                "| Luz:", registro[5],
+                "| Ventilador:", registro[6],
+                "| Luz cultivo:", registro[7],
+                "| Modo:", registro[8]
             )
 
     except sqlite3.Error as error:
@@ -72,7 +73,7 @@ def consultar_eventos():
                 SELECT
                     id,
                     dispositivo,
-                    timestamp,
+                    datetime(timestamp, 'unixepoch', 'localtime') AS fecha,
                     tipo,
                     detalle
                 FROM eventos
@@ -93,7 +94,7 @@ def consultar_eventos():
             print(
                 "ID:", registro[0],
                 "| Dispositivo:", registro[1],
-                "| Timestamp:", registro[2],
+                "| Fecha:", registro[2],
                 "| Tipo:", registro[3],
                 "| Detalle:", registro[4]
             )
@@ -115,7 +116,7 @@ def consultar_comandos():
                 SELECT
                     id,
                     dispositivo,
-                    timestamp,
+                    datetime(timestamp, 'unixepoch', 'localtime') AS fecha,
                     accion,
                     valor,
                     resultado,
@@ -138,7 +139,7 @@ def consultar_comandos():
             print(
                 "ID:", registro[0],
                 "| Dispositivo:", registro[1],
-                "| Timestamp:", registro[2],
+                "| Fecha:", registro[2],
                 "| Accion:", registro[3],
                 "| Valor:", registro[4],
                 "| Resultado:", registro[5],
