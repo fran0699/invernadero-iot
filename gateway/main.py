@@ -66,8 +66,9 @@ def al_conectar(cliente, datos_usuario, flags, codigo, propiedades):
         print("Error de conexion MQTT. Codigo:", codigo)
 
 
+
 def al_recibir_mensaje(cliente, datos_usuario, mensaje):
-    """Recibe mensajes MQTT y los guarda según su tópico."""
+    """Recibe mensajes MQTT, los valida y los guarda en SQLite."""
 
     try:
         contenido = mensaje.payload.decode("utf-8")
@@ -76,10 +77,6 @@ def al_recibir_mensaje(cliente, datos_usuario, mensaje):
         if not isinstance(datos, dict):
             print("Error: el mensaje JSON debe ser un objeto.")
             return
-
-        print("\n===== MENSAJE MQTT RECIBIDO =====")
-        print("Topico:", mensaje.topic)
-        print("Contenido:", datos)
 
         if mensaje.topic == TOPICO_LECTURAS:
 
@@ -99,10 +96,44 @@ def al_recibir_mensaje(cliente, datos_usuario, mensaje):
                 and validar_tipos_lectura(datos)
                 and validar_valores_lectura(datos)
             ):
+                dispositivo = datos["dispositivo"]
+
+                temperatura = datos["temperatura"]
+                humedad = datos["humedad"]
+                luz = datos["luz"]
+
+                ventilador = (
+                    "ENCENDIDO" if datos["ventilador"]
+                    else "APAGADO"
+                )
+
+                luz_cultivo = (
+                    "encendida" if datos["luz_cultivo"]
+                    else "apagada"
+                )
+
+                modo = datos["modo"]
+
+                print(
+                    f"\n---------- Lectura de {dispositivo} ----------"
+                )
+
+                print(
+                    f"Temperatura: {temperatura} C | "
+                    f"Humedad: {humedad} % | "
+                    f"Luz: {luz} %"
+                )
+
+                print(
+                    f"Ventilador: {ventilador} | "
+                    f"Luz de cultivo: {luz_cultivo} | "
+                    f"Modo: {modo}"
+                )
+
                 guardar_lectura(datos)
 
-                # Enviar también la lectura válida a Adafruit IO.
-                # nube.py controla el intervalo de publicación.
+                # Enviar la lectura valida a Adafruit IO.
+                # nube.py controla el intervalo de publicacion.
                 nube.enviar_lectura(datos)
 
             else:
@@ -111,14 +142,35 @@ def al_recibir_mensaje(cliente, datos_usuario, mensaje):
         elif mensaje.topic == TOPICO_EVENTOS:
 
             if validar_evento(datos):
+                dispositivo = datos["dispositivo"]
+                tipo = datos["tipo"]
+                detalle = datos["detalle"]
+
+                print(
+                    f"\n---------- Evento de {dispositivo} ----------"
+                )
+                print(f"{tipo}: {detalle}")
+
                 guardar_evento(datos)
+
             else:
                 print("Evento MQTT rechazado: datos invalidos.")
 
         elif mensaje.topic == TOPICO_COMANDOS:
 
             if validar_comando(datos):
+                dispositivo = datos["dispositivo"]
+                accion = datos["accion"]
+                valor = datos["valor"]
+                resultado = datos["resultado"]
+
+                print(
+                    f"\n---------- Comando de {dispositivo} ----------"
+                )
+                print(f"{accion} = {valor} -> {resultado}")
+
                 guardar_comando(datos)
+
             else:
                 print("Comando MQTT rechazado: datos invalidos.")
 
@@ -127,6 +179,7 @@ def al_recibir_mensaje(cliente, datos_usuario, mensaje):
 
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
         print("Error al interpretar el mensaje MQTT:", error)
+
 
 
 def reenviar_orden_de_la_nube(accion, valor):

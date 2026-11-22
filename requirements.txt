@@ -1,8 +1,40 @@
-# Invernadero IoT - Desarrollo de Software VIII
-# Dependencias necesarias para ejecutar el Gateway en Python.
+
+# ============================================================
+# PROYECTO: INVERNADERO IoT
+# Universidad Tecnologica de Panama
+# Desarrollo 8 - Python y MicroPython
+# ============================================================
 #
-# Instalacion desde la raiz del proyecto:
-# py -m pip install -r requirements.txt
+# INTEGRANTES Y RESPONSABILIDADES
 #
-# Biblioteca para la comunicacion con el broker MQTT EMQX.
+# 1. Francisco Lata - Placa: sensores, actuadores y circuito
+#    - Diseno del circuito en Wokwi.
+#    - Lectura de sensores y control de actuadores.
+#    - Implementacion de reglas automaticas.
+#    - Capturas del circuito y archivo ZIP de Wokwi.
+#
+# 2. Jose Luna - Placa: conexion y eventos
+#    - Conexion Wi-Fi y sincronizacion de hora mediante NTP.
+#    - Implementacion del cliente MQTT.
+#    - Muestreo periodico utilizando Timer.
+#    - Almacenamiento local ante fallos de conexion.
+#    - Desarrollo del archivo main.py de la placa.
+#
+# 3. Juan Vasquez - Gateway y base de datos
+#    - Desarrollo del Gateway en Python.
+#    - Implementacion de la base de datos SQLite.
+#    - Creacion de scripts SQL y consultas de historicos.
+#    - Gestion del archivo requirements.txt.
+#
+# 4. Luis Barnett - Nube y documentacion
+#    - Configuracion de Adafruit IO: dashboard y botones.
+#    - Integracion del Gateway con la nube.
+#    - Diagramas de arquitectura y flujo de datos.
+#    - Documentacion de configuracion de la nube.
+#    - Elaboracion del README final.
+#
+# ============================================================
+# DEPENDENCIAS DE PYTHON
+# ============================================================
+
 paho-mqtt==2.2.0
