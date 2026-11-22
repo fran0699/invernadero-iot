@@ -44,7 +44,8 @@ La Pico W lee la temperatura, la humedad y la luz, y enciende el ventilador o la
 | `docs/flujo_datos.md` | Diagramas de flujo de datos: lecturas, órdenes y eventos |
 | `docs/configuracion_nube.md` | Paso a paso para configurar Adafruit IO |
 | `docs/img/` | Diagramas en imagen y capturas |
-| `requirements.txt` | Librerías del gateway |
+| `docs/wokwi_invernadero.zip` | Proyecto de Wokwi exportado (los mismos archivos de `placa/`) |
+| `requirements.txt` | Integrantes que aportaron y librerías del gateway |
 
 ## Cómo ejecutarlo
 
@@ -90,7 +91,7 @@ Conectado a Adafruit IO como <usuario>
 
 ### 4. Iniciar la placa en Wokwi
 
-1. Abrir el proyecto en Wokwi: **<!-- TODO Francisco: enlace del proyecto -->**
+1. Abrir el proyecto en Wokwi: <https://wokwi.com/projects/480171535918611457>
    (o crear un proyecto de Raspberry Pi Pico W con MicroPython y copiar ahí todos los archivos de `placa/`).
    `umqttsimple.py` va junto a los demás archivos, no dentro de una carpeta `umqtt/`, porque Wokwi no permite carpetas. Sin él, la placa falla con `ImportError: no module named 'umqtt'`.
 2. Presionar **Start Simulation**. La consola de Wokwi debe mostrar la conexión a `Wokwi-GUEST`, la hora NTP y la conexión a EMQX.
