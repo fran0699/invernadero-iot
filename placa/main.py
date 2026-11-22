@@ -106,6 +106,10 @@ def reenviar_pendientes_y_notificar():
     pendientes = almacenamiento.cargar_lecturas_pendientes()
     cantidad = len(pendientes)
 
+    # Si no había nada guardado, no hay nada que reenviar ni que notificar
+    if cantidad == 0:
+        return True
+
     for lectura in pendientes:
         exito = conexion_mqtt.publicar_lectura(cliente_mqtt, lectura)
         if not exito:
@@ -131,6 +135,9 @@ def asegurar_conexion():
         cliente_mqtt = None
         if not red.conectar_wifi():
             return False
+
+    # Si NTP falló antes, se reintenta en cada ciclo hasta tener la hora correcta
+    if not red.hora_sincronizada:
         red.sincronizar_hora_ntp()
 
     if cliente_mqtt is None:
