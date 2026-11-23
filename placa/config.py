@@ -28,6 +28,7 @@ WIFI_TIMEOUT_S = 15          # Regla #1: no esperar la conexión para siempre
 # --- MQTT (José) ---
 MQTT_BROKER = "broker.emqx.io"
 MQTT_PUERTO = 1883
+MQTT_TIMEOUT_S = 5           # Evita que connect o publish se bloqueen si cae la red
 DISPOSITIVO = "pico01"
 
 # "fran0699" evita que otro grupo use los mismos tópicos en el broker público
