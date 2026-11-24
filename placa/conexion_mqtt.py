@@ -40,7 +40,7 @@ def conectar_mqtt(callback_mensajes):
             keepalive=60
         )
         cliente.set_callback(callback_mensajes)
-        cliente.connect()
+        cliente.connect(timeout=config.MQTT_TIMEOUT_S)
         cliente.subscribe(config.TOPICO_CONTROL.encode("utf-8"))
         print("MQTT conectado como:", client_id)
         print("Suscrito a:", config.TOPICO_CONTROL)
@@ -60,6 +60,8 @@ def publicar_json(cliente, topico, diccionario):
         return False
     try:
         mensaje = json.dumps(diccionario)
+        # check_msg() deja el socket sin timeout; se restaura antes de publicar
+        cliente.sock.settimeout(config.MQTT_TIMEOUT_S)
         cliente.publish(topico.encode("utf-8"), mensaje.encode("utf-8"))
         return True
     except Exception as error:
