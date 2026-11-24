@@ -51,7 +51,7 @@ La Pico W lee la temperatura, la humedad y la luz, y enciende el ventilador o la
 
 ### Requisitos
 
-- Python 3.12 en Windows (los comandos usan `py`; en Linux o macOS, `python3`).
+- Python 3.12 o superior en Windows (probado con 3.13; los comandos usan `py`; en Linux o macOS, `python3`). Si no está instalado: `winget install -e --id Python.Python.3.13`, y cerrar y abrir PowerShell.
 - Una cuenta gratis de Adafruit IO con los feeds y el dashboard creados: ver [docs/configuracion_nube.md](docs/configuracion_nube.md).
 - Navegador con acceso a <https://wokwi.com>.
 
@@ -77,16 +77,20 @@ Abrir `gateway/secretos.py` y escribir el usuario y la clave de Adafruit IO (íc
 py -m gateway.main
 ```
 
-Debe mostrar la conexión a los dos brokers:
+Debe mostrar la base de datos y la conexión a los dos brokers (el orden puede variar un poco, porque la conexión a Adafruit IO corre en paralelo):
 
 ```text
+Base de datos inicializada correctamente.
 Conectando al broker: broker.emqx.io
+Conectando a Adafruit IO: io.adafruit.com
 Gateway conectado correctamente al broker MQTT.
 Suscrito al tópico: utp/fisc/ds8/fran0699/invernadero/lecturas
 Suscrito al tópico: utp/fisc/ds8/fran0699/invernadero/eventos
 Suscrito al tópico: utp/fisc/ds8/fran0699/invernadero/comandos
-Conectando a Adafruit IO: io.adafruit.com
 Conectado a Adafruit IO como <usuario>
+Escuchando el feed: control-ventilador
+Escuchando el feed: control-luz-cultivo
+Escuchando el feed: control-modo
 ```
 
 ### 4. Iniciar la placa en Wokwi
@@ -97,11 +101,18 @@ Conectado a Adafruit IO como <usuario>
 2. Presionar **Start Simulation**. La consola de Wokwi debe mostrar la conexión a `Wokwi-GUEST`, la hora NTP y la conexión a EMQX.
 3. Para cambiar las lecturas: hacer clic en el DHT22 o en la fotorresistencia durante la simulación y mover los controles.
 
+**Mientras el sistema corre:**
+
+- **Wokwi en su propia ventana del navegador y siempre visible:** sin minimizarla, sin cambiar de pestaña en esa ventana y sin taparla por completo. El navegador frena las páginas ocultas y la simulación se detiene. Con una sola pantalla: Wokwi a la izquierda (Win+←) y el dashboard a la derecha (Win+→); el PowerShell del gateway puede quedar detrás.
+- **Nunca Ctrl+C en la consola de Wokwi:** detiene el programa de la placa (`KeyboardInterrupt`). Para copiar texto, detener antes la simulación. En PowerShell, Ctrl+C sin texto seleccionado detiene el gateway.
+- **Una persona a la vez:** todos usamos los mismos tópicos, el mismo `pico01` y la misma cuenta de Adafruit IO; si dos corren la placa o el gateway al mismo tiempo, los datos se mezclan.
+
 ### 5. Usar el dashboard
 
 - Los medidores y la gráfica se actualizan cada 15 s.
 - **Encender ventilador / luz de cultivo**: aplica la orden y pasa la placa a modo manual.
 - **Modo**: `Automático` devuelve el control a las reglas por umbral.
+- Los interruptores muestran la última orden dada; los indicadores muestran el estado real que reporta la placa.
 
 ### 6. Consultar el histórico
 
@@ -118,8 +129,16 @@ Muestra los últimos 10 registros de `lecturas`, `eventos` y `comandos`.
 | A. Lecturas a la nube | Correr gateway y placa; esperar 1 minuto | Una fila en `lecturas` cada 5 s; el dashboard cambia cada 15 s |
 | B. Control del ventilador | Presionar **Encender ventilador** | El relé cambia en Wokwi; `comandos` registra `ejecutado`; el indicador del dashboard se enciende y el modo pasa a `manual` |
 | C. Cambio de modo | Pasar a **Manual**, subir la temperatura sobre 30 °C, luego volver a **Automático** | En manual la regla no actúa; en automático enciende el ventilador y se registra un evento `regla_automatica` |
-| D. Token inválido | Publicar a mano en `/control` con otro `auth_token` (por ejemplo, con MQTTX) | La placa no ejecuta; `comandos` registra `rechazado` / `token invalido` |
-| E. Caída de conexión | Desconectar el Wi-Fi de la placa unos segundos | Al volver se reenvían las lecturas guardadas y se registra un evento `reconexion` |
+| D. Token inválido | Publicar a mano en `/control` con otro `auth_token`, con el comando de abajo | La placa no ejecuta; `comandos` registra `rechazado` / `token invalido` |
+| E. Caída de conexión | Cortar el internet de la PC unos 40 s y volver a conectarlo | El gateway se reconecta solo a EMQX y a Adafruit IO. La placa no se congela: cuando una publicación agota los 5 s de espera, guarda las lecturas (`Lectura guardada localmente`) y sigue midiendo; cuando vuelve la red, las reenvía y se registra un evento `reconexion` |
+
+Comando para la prueba D (en una segunda ventana de PowerShell, desde la raíz del proyecto):
+
+```powershell
+py -c "import json, paho.mqtt.publish as p; p.single('utp/fisc/ds8/fran0699/invernadero/control', json.dumps({'auth_token': 'clave_falsa', 'accion': 'ventilador', 'valor': True}), hostname='broker.emqx.io')"
+```
+
+En la prueba E, la red simulada de Wokwi puede no recuperarse dentro de la misma simulación (ícono de Wi-Fi tachado junto al botón de pausa). En ese caso la placa sigue midiendo y guardando lecturas hasta que se reinicia la simulación; la falla es de Wokwi, no del código.
 
 La nube se puede probar sola, sin placa ni gateway, con `py -m gateway.prueba_nube` ([detalles](docs/configuracion_nube.md#5-probar-la-conexión-sin-la-placa-ni-el-gateway)).
 

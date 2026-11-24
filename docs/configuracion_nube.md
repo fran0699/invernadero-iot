@@ -40,8 +40,8 @@ Estos nombres están en `gateway/config.py` (`FEED_...`). Si se cambia uno en Ad
 | Humedad | Gauge | `humedad` | Min 0, Max 100, Label `%` |
 | Luz | Gauge | `luz` | Min 0, Max 100, Label `%`. Opcional: Low warning 40 |
 | Historial | Line Chart | `temperatura`, `humedad` y `luz` | Show History: 1 hour. Y-Axis Min 0, Max 100 |
-| Ventilador | Indicator | `estado-ventilador` | Condición `=` `1`. On Color verde, Off Color gris |
-| Luz de cultivo | Indicator | `estado-luz-cultivo` | Condición `=` `1`. On Color amarillo, Off Color gris |
+| Ventilador | Indicator | `estado-ventilador` | Condición `=` `1`. On Color verde, Off Color rojo |
+| Luz de cultivo | Indicator | `estado-luz-cultivo` | Condición `=` `1`. On Color amarillo, Off Color rojo |
 | Modo actual | Text | `estado-modo` | Font size grande |
 
 Los umbrales opcionales (30 °C y 40 %) son los mismos de `placa/config.py`, así el color del medidor coincide con lo que hace la regla automática.
